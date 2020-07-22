@@ -44,9 +44,12 @@ int main(int argc, char **argv)
 {
 
 	int rank, nproc;
-	MPI_Init(&argc, &argv);
-	MPI_Comm_rank(MPI_COMM_WORLD, &rank);
-	MPI_Comm_size(MPI_COMM_WORLD, &nproc);
+	// MPI_Init(&argc, &argv);
+
+        int comm;
+        comm = nanos6_app_communicator();
+	MPI_Comm_rank(comm, &rank);
+	MPI_Comm_size(comm, &nproc);
 
 	if (argc < 2) {
 		cerr << "Usage: " << argv[0] << " n [ngp] [steps]" << endl;
@@ -153,13 +156,13 @@ int main(int argc, char **argv)
 
 		micro.update_vars();
 
-		MPI_Barrier(MPI_COMM_WORLD);
+		MPI_Barrier(comm);
 
 		cout << "Rank = " << rank
 		     << " time = " << duration.count() << " ms" << endl;
 	}
 
-	MPI_Finalize();
+	// MPI_Finalize();
 
 	return 0;
 }

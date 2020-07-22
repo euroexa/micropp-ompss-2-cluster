@@ -6,6 +6,31 @@ project(
   LANGUAGES C CXX Fortran)
 set(CMAKE_CXX_STANDARD 11)
 
+if (NANOS6)
+  #find_program(MCXX mcxx)
+  find_program(MCXX mcxx)
+  find_program(MCC mcc)
+  find_program(MFC mfc)
+
+  if (MCXX AND MCC AND MFC)
+
+    message(STATUS "Building for nanos6")
+    set(CMAKE_CXX_COMPILER ${MCXX} CACHE INTERNAL "" FORCE)
+    set(CMAKE_Fortran_COMPILER ${MFC} CACHE INTERNAL "" FORCE)
+    set(CMAKE_C_COMPILER ${MCC} CACHE INTERNAL "" FORCE)
+
+    add_definitions("--ompss-2 -k -DNANOS6")
+    set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} --ompss-2 -k -DNANOS6")
+    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} --ompss-2 -k -DNANOS6")
+    set(CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} --ompss-2 -k -DNANOS6")
+
+    set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --ompss-2")
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} --ompss-2")
+  else()
+    message(FATAL_ERROR "Mercurium not found")
+  endif()
+endif()
+
 set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "RelWithDebInfo")
 
 option(ENABLE_CUDA "Enable CUDA" OFF)
