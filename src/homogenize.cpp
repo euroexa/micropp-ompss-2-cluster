@@ -72,7 +72,7 @@ void micropp<tdim>::homogenize_linear()
 		 * stress = ctan_lin * strain
 		 */
 
-		homogenize_linear(gp_ptr);
+		homogenize_linear(gp_ptr, ell_cols, ell_cols_size);
 	}
 }
 
@@ -99,15 +99,15 @@ void micropp<tdim>::homogenize()
 			 * is this simple and cheap procedure.
 			 */
 
-			homogenize_linear(gp_ptr);
+			homogenize_linear(gp_ptr, ell_cols, ell_cols_size);
 
 		} else if (gp_ptr->coupling == FE_ONE_WAY) {
 
-			homogenize_fe_one_way(gp_ptr);
+			homogenize_fe_one_way(gp_ptr, ell_cols, ell_cols_size);
 
 		} else if (gp_ptr->coupling == FE_FULL) {
 
-			homogenize_fe_full(gp_ptr);
+			homogenize_fe_full(gp_ptr, ell_cols, ell_cols_size);
 
 		}
 	}
@@ -119,7 +119,7 @@ void micropp<tdim>::homogenize()
 
 
 template<int tdim>
-void micropp<tdim>::homogenize_linear(gp_t<tdim> * gp_ptr)
+void micropp<tdim>::homogenize_linear(gp_t<tdim> * gp_ptr, int *ell_cols, int ell_cols_size)
 {
 	memset (gp_ptr->stress, 0.0, nvoi * sizeof(double));
 	for (int i = 0; i < nvoi; ++i) {
@@ -131,12 +131,12 @@ void micropp<tdim>::homogenize_linear(gp_t<tdim> * gp_ptr)
 
 
 template<int tdim>
-void micropp<tdim>::homogenize_fe_one_way(gp_t<tdim> * gp_ptr)
+void micropp<tdim>::homogenize_fe_one_way(gp_t<tdim> * gp_ptr, int *ell_cols, int ell_cols_size)
 {
 
 	ell_matrix A;  // Jacobian
 	const int ns[3] = { nx, ny, nz };
-	ell_init(&A, dim, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
+	ell_init(&A, ell_cols, dim, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
 	double *b = (double *) calloc(nndim, sizeof(double));
 	double *du = (double *) calloc(nndim, sizeof(double));
 	double *u = (double *) calloc(nndim, sizeof(double));
@@ -215,12 +215,12 @@ void micropp<tdim>::homogenize_fe_one_way(gp_t<tdim> * gp_ptr)
 
 
 template<int tdim>
-void micropp<tdim>::homogenize_fe_full(gp_t<tdim> * gp_ptr)
+void micropp<tdim>::homogenize_fe_full(gp_t<tdim> * gp_ptr, int *ell_cols, int ell_cols_size)
 {
 
 	ell_matrix A;  // Jacobian
 	const int ns[3] = { nx, ny, nz };
-	ell_init(&A, dim, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
+	ell_init(&A, ell_cols, dim, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
 	double *b = (double *) calloc(nndim, sizeof(double));
 	double *du = (double *) calloc(nndim, sizeof(double));
 	double *u = (double *) calloc(nndim, sizeof(double));

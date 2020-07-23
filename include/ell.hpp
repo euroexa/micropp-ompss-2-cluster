@@ -61,7 +61,9 @@ typedef struct {
 
 } ell_matrix;
 
-void ell_init(ell_matrix *m, const int nfield, const int dim, const int ns[3],
+int *ell_init_cols(const int nfield, const int dim, const int ns[1], int *size);
+
+void ell_init(ell_matrix *m, int *cols, const int nfield, const int dim, const int ns[3],
 	      const double min_err = CG_ABS_TOL,
 	      const double rel_err = CG_REL_TOL,
 	      const int max_its = CG_MAX_ITS);

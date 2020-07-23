@@ -117,6 +117,10 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 
 	calc_volume_fractions();
 
+	const int ns[3] = { nx, ny, nz };
+	const int nfield = dim;
+	ell_cols = ell_init_cols(dim, dim, ns, &ell_cols_size);
+
 	if (params.use_A0) {
 #ifdef _OPENMP
 		int num_of_A0s = omp_get_max_threads();
@@ -127,7 +131,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 
 #pragma omp parallel for schedule(dynamic,1)
 		for (int i = 0; i < num_of_A0s; ++i) {
-			ell_init(&A0[i], dim, dim, params.size, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
+			ell_init(&A0[i], ell_cols, dim, dim, params.size, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
 			double *u = (double *) calloc(nndim, sizeof(double));
 			assembly_mat(&A0[i], u, nullptr);
 			free(u);
@@ -273,7 +277,7 @@ void micropp<tdim>::calc_ctan_lin_fe_models()
 		const int ns[3] = { nx, ny, nz };
 
 		ell_matrix A;  // Jacobian
-		ell_init(&A, dim, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
+		ell_init(&A, ell_cols, dim, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);
 		double *b = (double *) calloc(nndim, sizeof(double));
 		double *du = (double *) calloc(nndim, sizeof(double));
 		double *u = (double *) calloc(nndim, sizeof(double));

@@ -22,6 +22,13 @@
 
 #pragma once
 
+// Debug print macro.
+#ifdef NDEBUG
+#define dbprintf(...)
+#else
+#define dbprintf(...) fprintf(stderr, __VA_ARGS__)
+#endif
+
 
 #include <vector>
 #include <iostream>
@@ -171,3 +178,32 @@ inline double invert_3x3(const double mat[3][3], double mat_inv[3][3])
 
 	return det;
 }
+
+inline void distribute(int total, int nodes, int *start, int *nelems)
+{
+	assert (nodes > 0);
+	const int frac = total / nodes;
+	const int mod = total - frac * nodes;
+	int cum = 0;
+	for(int i = 0; i < mod; ++i) {
+		nelems[i] = frac + 1;
+		start[i] = cum;
+		cum += frac + 1;
+	}
+
+	for(int i = mod; i < nodes; ++i) {
+		nelems[i] = frac;
+		start[i] = cum;
+		cum += frac;
+	}
+}
+
+template <typename T>
+void printarray(const int size, T *array)
+{
+	cerr << "[ ";
+	for (int i = 0; i < size; ++i)
+		cerr << array[i] << " ";
+	cerr << "]\n";
+}
+

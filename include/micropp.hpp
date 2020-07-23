@@ -106,6 +106,9 @@ class micropp {
 		int its_with_A0;
 		ell_matrix *A0;
 
+                int *ell_cols;
+                int ell_cols_size;
+
 		/* Rule of Mixture Stuff (for 2 mats micro-structure only) */
 		double Vm;  // Volume fraction of Matrix
 		double Vf;  // Volume fraction of Fiber
@@ -128,11 +131,11 @@ class micropp {
 		 * linearly
 		 *
 		 */
-		void homogenize_linear(gp_t<tdim> *gp_ptr);
+		void homogenize_linear(gp_t<tdim> *gp_ptr, int *ell_cols, int ell_cols_size);
 
 		/* FE-based homogenizations */
-		void homogenize_fe_one_way(gp_t<tdim> *gp_ptr);
-		void homogenize_fe_full(gp_t<tdim> *gp_ptr);
+		void homogenize_fe_one_way(gp_t<tdim> *gp_ptr, int *ell_cols, int ell_cols_size);
+		void homogenize_fe_full(gp_t<tdim> *gp_ptr, int *ell_cols, int ell_cols_size);
 
 		void calc_ctan_lin_fe_models();
 		void calc_ctan_lin_mix_rule_Chamis(double ctan[nvoi * nvoi]);
