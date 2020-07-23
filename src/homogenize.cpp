@@ -21,7 +21,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
+#include <nanos6.h>
 #include <cmath>
 #include <cassert>
 
@@ -105,7 +105,10 @@ void micropp<tdim>::homogenize()
 		double *tpu_n = gp_ptr->u_n;
 		double *tpvars_k = gp_ptr->vars_k;
 		double *tpvars_n = gp_ptr->vars_n;
-                int priority = gp_ptr->allocated ? 10 : 1;
+                int nonlinear = gp_ptr->strain[1] > 0.001;
+                int priority = nonlinear ? 10 : 1;
+
+                printf("app rank %d: task priority %d\n", mpi_rank, priority);
 
 		if (gp_ptr->coupling == FE_LINEAR ||
 		    gp_ptr->coupling == MIX_RULE_CHAMIS) {
@@ -164,6 +167,7 @@ void micropp<tdim>::homogenize()
 			homogenize_fe_one_way(gp_ptr, tpell_cols, tell_cols_size);
 
 		} else if (gp_ptr->coupling == FE_FULL) {
+                        assert(0);
 #if 0
                         #pragma oss task in(this[0])		\
                                 in(tpell_cols[0; tell_cols_size]) \
@@ -179,6 +183,7 @@ void micropp<tdim>::homogenize()
 			homogenize_fe_full(gp_ptr, tpell_cols, tell_cols_size);
 
 		}
+                
 	}
 
         #pragma oss taskwait
@@ -203,7 +208,7 @@ void micropp<tdim>::homogenize_linear(gp_t<tdim> * gp_ptr, int *ell_cols, int el
 template<int tdim>
 void micropp<tdim>::homogenize_fe_one_way(gp_t<tdim> * gp_ptr, int *ell_cols, int ell_cols_size)
 {
-        std::cout << "homogenize_fe_one_way on " << get_node_id() << " of " << get_nodes_nr() << "; this=" << this << "\n";
+        std::cout << "app rank = " << mpi_rank << " homogenize_fe_one_way on " << get_node_id() << " of " << get_nodes_nr() << "\n";
 
 	ell_matrix A;  // Jacobian
 	const int ns[3] = { nx, ny, nz };
