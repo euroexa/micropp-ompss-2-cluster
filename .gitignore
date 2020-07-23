@@ -1,3 +1,8 @@
+src/tags
+test/.balance/
+test/.map
+test/mcxx_mpi-load-balance.cpp
+test/mpi-load-balance
 *.dat
 *.txt
 *.out*

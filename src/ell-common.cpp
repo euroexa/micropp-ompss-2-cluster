@@ -24,7 +24,7 @@
 #include <fstream>
 #include <iostream>
 
-
+#include "tasks.hpp"
 #include "ell.hpp"
 #include "instrument.hpp"
 
@@ -49,7 +49,6 @@ int *ell_init_cols(const int nfield, const int dim, const int ns[3],
 	// int *cols = (int *) rrd_malloc(size * sizeof(int));
 	int *cols = (int *) malloc(size * sizeof(int));
 
-#if 0
  	// #pragma oss task weakout(cols[0; size]) label(init_ell_cols_weak)
 	{
 		const int nodes = get_nodes_nr();
@@ -170,7 +169,6 @@ int *ell_init_cols(const int nfield, const int dim, const int ns[3],
 		}
 	}
 	// #pragma oss taskwait
-        #endif
 
 	return cols;
 }
@@ -201,7 +199,7 @@ void ell_init(ell_matrix *m, int *cols, const int nfield, const int dim, const i
 	m->nnz = nnz;
 	m->nrow = nrow;
 	m->ncol = nrow;
-	m->cols = (int *) malloc(nnz * nrow * sizeof(int));
+	m->cols = cols;
 	m->vals = (double *) malloc(nnz * nrow * sizeof(double));
 
 	m->max_its = max_its;
@@ -212,83 +210,6 @@ void ell_init(ell_matrix *m, int *cols, const int nfield, const int dim, const i
 	m->z = (double *) malloc(nn * nfield * sizeof(double));
 	m->p = (double *) malloc(nn * nfield * sizeof(double));
 	m->Ap = (double *) malloc(nn * nfield * sizeof(double));
-
-	if (dim == 2) {
-
-		for (int fi = 0; fi < nfield; ++fi) {
-			for (int xi = 0; xi < nx; ++xi) {
-				for (int yi = 0; yi < ny; ++yi) {
-
-					const int ni = nod_index2D(xi, yi);
-					int * const cols_ptr = &(m->cols[ni * nfield * nnz + fi * nnz]);
-
-					int ix[9] = {
-						(yi == 0 || xi == 0)           ? 0 : ni - nx - 1,
-						(yi == 0)                      ? 0 : ni - nx,
-						(yi == 0 || xi == nx - 1)      ? 0 : ni - nx + 1,
-						(xi == 0)                      ? 0 : ni - 1,
-						ni,
-						(xi == nx - 1)                 ? 0 : ni + 1,
-						(xi == 0 || yi == ny - 1)      ? 0 : ni + nx - 1,
-						(yi == ny - 1)                 ? 0 : ni + nx,
-						(xi == nx - 1 || yi == ny - 1) ? 0 : ni + nx + 1 };
-
-					for (int n = 0; n < num_nodes; ++n)
-						for (int fj = 0; fj < nfield; ++fj)
-							cols_ptr[n * nfield + fj] = ix[n] * nfield + fj;
-				}
-			}
-		}
-
-	} else if (dim == 3) {
-
-		for (int fi = 0; fi < nfield; ++fi) {
-			for (int xi = 0; xi < nx; ++xi) {
-				for (int yi = 0; yi < ny; ++yi) {
-					for (int zi = 0; zi < nz; ++zi) {
-
-						const int ni = nod_index3D(xi, yi, zi);
-						int * const cols_ptr = &(m->cols[ni * nfield * nnz + fi * nnz]);
-
-						int ix[27] = {
-							(zi == 0 || yi == 0 || xi == 0)                ? 0 : ni - nxny - nx - 1,
-							(zi == 0 || yi == 0)                           ? 0 : ni - nxny - nx,
-							(zi == 0 || yi == 0 || xi == nx - 1)           ? 0 : ni - nxny - nx + 1,
-							(zi == 0 || xi == 0)                           ? 0 : ni - nxny - 1,
-							(zi == 0)                                      ? 0 : ni - nxny,
-							(zi == 0 || xi == nx - 1)                      ? 0 : ni - nxny + 1,
-							(zi == 0 || yi == ny - 1 || xi == 0)           ? 0 : ni - nxny + nx - 1,
-							(zi == 0 || yi == ny - 1)                      ? 0 : ni - nxny + nx,
-							(zi == 0 || yi == ny - 1 || xi == nx - 1)      ? 0 : ni - nxny + nx + 1,
-
-							(yi == 0 || xi == 0)                           ? 0 : ni - nx - 1,
-							(yi == 0)                                      ? 0 : ni - nx,
-							(yi == 0 || xi == nx - 1)                      ? 0 : ni - nx + 1,
-							(xi == 0)                                      ? 0 : ni - 1,
-							ni,
-							(xi == nx - 1)                                 ? 0 : ni + 1,
-							(yi == ny - 1 || xi == 0)                      ? 0 : ni + nx - 1,
-							(yi == ny - 1)                                 ? 0 : ni + nx,
-							(yi == ny - 1 || xi == nx - 1)                 ? 0 : ni + nx + 1,
-
-							(zi == nz - 1 || yi == 0 || xi == 0)           ? 0 : ni + nxny - nx - 1,
-							(zi == nz - 1 || yi == 0)                      ? 0 : ni + nxny - nx,
-							(zi == nz - 1 || yi == 0 || xi == nx - 1)      ? 0 : ni + nxny - nx + 1,
-							(zi == nz - 1 || xi == 0)                      ? 0 : ni + nxny - 1,
-							(zi == nz - 1)                                 ? 0 : ni + nxny,
-							(zi == nz - 1 || xi == nx - 1)                 ? 0 : ni + nxny + 1,
-							(zi == nz - 1 || yi == ny - 1 || xi == 0)      ? 0 : ni + nxny + nx - 1,
-							(zi == nz - 1 || yi == ny - 1)                 ? 0 : ni + nxny + nx,
-							(zi == nz - 1 || yi == ny - 1 || xi == nx - 1) ? 0 : ni + nxny + nx + 1 };
-
-						for (int n = 0; n < num_nodes; ++n)
-							for (int fj = 0; fj < nfield; ++fj)
-								cols_ptr[n * nfield + fj] = ix[n] * nfield + fj;
-					}
-				}
-			}
-		}
-	}
 
 }
 
@@ -483,8 +404,8 @@ void ell_set_bc_3D(ell_matrix *m)
 
 void ell_free(ell_matrix *m)
 {
-	if (m->cols != NULL)
-		free(m->cols);
+	// if (m->cols != NULL)
+	//	free(m->cols);
 	if (m->vals != NULL)
 		free(m->vals);
 	if (m->k != NULL)
