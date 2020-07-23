@@ -112,11 +112,15 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 
 		const int tnndim = nndim;
 
+                const int ns[3] = { nx, ny, nz };
+                const int nfield = dim;
+                int *ell_cols = ell_init_cols(dim, dim, ns, &ell_cols_size);
+
 		#pragma oss task out(tpgp[0])		\
 			out(tpu_n[0;nndim])		\
                     	label(init_gp)                  \
                         priority(0)
-		tpgp->init(tpvars_n, tpvars_k, tpu_n, tpu_k, tnndim); //, tpctan_lin);
+		tpgp->init(tpvars_n, tpvars_k, tpu_n, tpu_k, tnndim, ell_cols); //, tpctan_lin);
 	}
 	#pragma oss taskwait
 
@@ -161,11 +165,10 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 
 	calc_volume_fractions();
 
-	const int ns[3] = { nx, ny, nz };
-	const int nfield = dim;
-	ell_cols = ell_init_cols(dim, dim, ns, &ell_cols_size);
 
 	if (params.use_A0) {
+        assert (0);
+        #if 0
 #ifdef _OPENMP
 		int num_of_A0s = omp_get_max_threads();
 #else
@@ -180,6 +183,7 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 			assembly_mat(&A0[i], u, nullptr);
 			free(u);
 		}
+#endif
 	}
 
 	/* Average tangent constitutive tensor initialization */
@@ -238,7 +242,7 @@ micropp<tdim>::~micropp()
 
 	cout << "Calling micropp<" << dim << "> destructor" << endl;
 
-        rrl_free(ell_cols, ell_cols_size * sizeof(int)); // TODO rrd
+        // rrl_free(ell_cols, ell_cols_size * sizeof(int)); // TODO rrd
 	rrl_free(elem_stress, nelem * nvoi * sizeof(double)); // TODO rrd
 	rrl_free(elem_strain, nelem * nvoi * sizeof(double)); // TODO rrd
 	rrl_free(elem_type, nelem * sizeof(int)); // TODO rrd
@@ -324,6 +328,8 @@ int micropp<tdim>::get_non_linear_gps(void) const
 template <int tdim>
 void micropp<tdim>::calc_ctan_lin_fe_models()
 {
+    assert(0);
+    #if 0
 
 // #pragma omp parallel for schedule(dynamic,1)
 	for (int i = 0; i < nvoi; ++i) {
@@ -353,6 +359,7 @@ void micropp<tdim>::calc_ctan_lin_fe_models()
 		free(u);
 		free(du);
 	}
+        #endif
 }
 
 

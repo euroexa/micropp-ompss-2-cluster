@@ -72,7 +72,7 @@ void micropp<tdim>::homogenize_linear()
 		 * stress = ctan_lin * strain
 		 */
 
-		homogenize_linear(gp_ptr, ell_cols, ell_cols_size);
+		homogenize_linear(gp_ptr, gp_ptr->ell_cols, ell_cols_size);
 	}
 }
 
@@ -87,7 +87,7 @@ void micropp<tdim>::homogenize()
 
 		gp_t<tdim> *gp_ptr = &gp_list[igp];
 
-		int *tpell_cols = ell_cols;
+		int *tpell_cols = gp_ptr->ell_cols;
 		const int tell_cols_size = ell_cols_size;
                 // for pragmas
 		const int lnvoi = nvoi;
@@ -122,7 +122,7 @@ void micropp<tdim>::homogenize()
 			 * is this simple and cheap procedure.
 			 */
 
-			homogenize_linear(gp_ptr, ell_cols, ell_cols_size);
+			homogenize_linear(gp_ptr, tpell_cols, ell_cols_size);
 
 		} else if (gp_ptr->coupling == FE_ONE_WAY) {
 
@@ -141,7 +141,6 @@ void micropp<tdim>::homogenize()
                             assert(location_of(d, "rrd_malloc") == NOT_MALLOC);
                             assert(location_of(m, "malloc") == ON_MALLOC);
                         }
-                    #endif
                         assert(location_of(this, "this") != ON_MALLOC);
                         assert(location_of(tpell_cols, "tpell_cols") != ON_MALLOC);
                         assert(location_of(tpmaterial0, "tpmaterial0") != ON_MALLOC);
@@ -151,6 +150,7 @@ void micropp<tdim>::homogenize()
                         assert(location_of(gp_ptr, "gp_ptr") != ON_MALLOC);
                         assert(location_of(tpu_k, "tpu_k") != ON_MALLOC);
                         assert(location_of(tpvars_n, "tpvars_n") != ON_MALLOC);
+                    #endif
 
                         #pragma oss task in(this[0])	  	  \
                                 in(tpell_cols[0; tell_cols_size]) \

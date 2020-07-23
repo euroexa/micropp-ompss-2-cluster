@@ -57,11 +57,13 @@ class gp_t {
 	bool converged;
 	bool subiterated;
 	int coupling;
+        int *ell_cols;
+
 
 	gp_t() = delete;
         
             void init(double *_vars_n, double *_vars_k,
-                      double *_u_n, double *_u_k, int nndim)
+                      double *_u_n, double *_u_k, int nndim, int *_ell_cols)
                       // double *ctan_lin)
             {
                     assert(nndim > 0);
@@ -76,6 +78,7 @@ class gp_t {
                     u_n = _u_n;
                     u_k = _u_k;
 
+                    ell_cols = _ell_cols;
                     // macro_ctan = ctan_lin;
 
                     memset(_u_n, 0, nndim * sizeof(double));

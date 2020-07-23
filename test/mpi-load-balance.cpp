@@ -36,7 +36,6 @@
 using namespace std;
 using namespace std::chrono;
 
-
 #define D_EPS 5.0e-4
 
 

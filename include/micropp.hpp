@@ -106,7 +106,6 @@ class micropp {
 		int its_with_A0;
 		ell_matrix *A0;
 
-                int *ell_cols;
                 int ell_cols_size;
 		double *du_n, *du_k, *dvars_n, *dvars_k;
 
