@@ -197,6 +197,9 @@ class micropp {
 
 	public:
 
+		static void* operator new(std::size_t sz);
+		static void operator delete(void *p);
+
 		micropp() = delete;
 
 		micropp(const micropp_params_t &params);

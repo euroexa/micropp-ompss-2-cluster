@@ -74,10 +74,10 @@ static inline void *rrl_calloc(size_t nmemb, size_t size)
 }
 
 
-static inline void rrl_free(void *in)
+static inline void rrl_free(void *in, size_t size)
 {
 	dbprintf("Using nanos6_lfree(%p)\n", in);
-	nanos6_lfree(in, 0);
+	nanos6_lfree(in, size);
 }
 
 
@@ -122,7 +122,7 @@ static inline void *rrl_calloc(size_t nmemb, size_t size)
 	return ret;
 }
 
-static inline void rrl_free(void *in)
+static inline void rrl_free(void *in, size_t)
 {
 	dbprintf("Using libc_lfree(%p)\n", in);
 	free(in);

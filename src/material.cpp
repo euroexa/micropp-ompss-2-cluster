@@ -18,7 +18,7 @@
  *  along with this program.  If not, see <https://www.gnu.org/licenses/>.
  */
 
-
+#include "tasks.hpp"
 #include "material.hpp"
 
 
@@ -31,20 +31,23 @@ material_t *material_t::make_material(const struct material_base material)
 	 * manage also from C/Fortran easily and that is why we passed micropp
 	 * constructor the data in this form.
 	 */
-
+        material_t *mat = nullptr;
 	switch (material.type) {
 		case 0:
-			return new material_elastic(material.E, material.nu);
+                        mat = (material_t *)rrl_malloc(sizeof(material_elastic)); // TODO rrd
+			return new(mat) material_elastic(material.E, material.nu);
 		case 1:
-			return new material_plastic(material.E, material.nu,
+                        mat = (material_t *)rrl_malloc(sizeof(material_plastic)); // TODO rrd
+			return new(mat) material_plastic(material.E, material.nu,
 						    material.Ka, material.Sy);
 		case 2:
-			return new material_damage(material.E, material.nu,
+                        mat = (material_t *)rrl_malloc(sizeof(material_damage)); // TODO rrd
+			return new(mat) material_damage(material.E, material.nu,
 						   material.Xt);
 		default:
 			break;
 	}
-	return nullptr;
+	return mat;
 }
 
 

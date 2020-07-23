@@ -19,9 +19,26 @@
  */
 
 
+#include "tasks.hpp"
 #include "micropp.hpp"
 #include "material.hpp"
 //#include "common.hpp"
+
+template<int tdim>
+void* micropp<tdim>::operator new(std::size_t sz)
+{
+	void *ret = rrl_malloc(sz);  // TODO rrd
+        assert(sz == sizeof(micropp<tdim>));
+	dbprintf("Calling custom micropp allocator addr: %p:%ul\n", ret, sz);
+	return ret;
+}
+
+template<int tdim>
+void micropp<tdim>::operator delete(void *p)
+{
+	dbprintf("Calling custom deallocator addr: %p\n", p);
+	rrl_free(p, sizeof(micropp<tdim>));  // TODO rrd
+}
 
 
 template<int tdim>
@@ -121,9 +138,9 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		}
 	}
 
-	elem_type = (int *) calloc(nelem, sizeof(int));
-	elem_stress = (double *) calloc(nelem * nvoi, sizeof(double));
-	elem_strain = (double *) calloc(nelem * nvoi, sizeof(double));
+	elem_type = (int *) rrl_malloc(nelem * sizeof(int)); // TODO rrd
+	elem_stress = (double *) rrl_malloc(nelem * nvoi * sizeof(double)); // TODO rrd
+	elem_strain = (double *) rrl_malloc(nelem * nvoi * sizeof(double)); // TODO rrd
 
 	for (int i = 0; i < num_geo_params; i++) {
 		geo_params[i] = params.geo_params[i];
@@ -219,9 +236,9 @@ micropp<tdim>::~micropp()
 
 	cout << "Calling micropp<" << dim << "> destructor" << endl;
 
-	free(elem_stress);
-	free(elem_strain);
-	free(elem_type);
+	rrl_free(elem_stress, nelem * nvoi * sizeof(double)); // TODO rrd
+	rrl_free(elem_strain, nelem * nvoi * sizeof(double)); // TODO rrd
+	rrl_free(elem_type, nelem * sizeof(int)); // TODO rrd
 
 	if (use_A0) {
 #ifdef _OPENMP
@@ -238,7 +255,7 @@ micropp<tdim>::~micropp()
 	}
 
 	for (int i = 0; i < MAX_MATERIALS; ++i) {
-		delete material_list[i];
+		rrl_free(material_list[i], sizeof(material_list[i])); // TODO rrd
 	}
 
 	// rrd_free(gp_list, ngp * sizeof(gp_t<tdim>)); // TODO

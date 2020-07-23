@@ -47,7 +47,7 @@ int *ell_init_cols(const int nfield, const int dim, const int ns[3],
 	*ell_cols_size = size;
 
 	// int *cols = (int *) rrd_malloc(size * sizeof(int));
-	int *cols = (int *) malloc(size * sizeof(int));
+	int *cols = (int *) rrl_malloc(size * sizeof(int)); // TODO rrd
 
  	// #pragma oss task weakout(cols[0; size]) label(init_ell_cols_weak)
 	{
