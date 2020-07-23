@@ -160,7 +160,6 @@ void micropp<tdim>::homogenize()
                                 out(tpvars_k[0; tnvars])          \
                                 in(tpvars_n[0; tnvars])           
 			homogenize_fe_one_way(gp_ptr, tpell_cols, tell_cols_size);
-                        #pragma oss taskwait
 
 		} else if (gp_ptr->coupling == FE_FULL) {
 #if 0
@@ -180,6 +179,7 @@ void micropp<tdim>::homogenize()
 		}
 	}
 
+        #pragma oss taskwait
 	if (write_log_flag) {
 		write_log();
 	}
