@@ -323,7 +323,7 @@ template <int tdim>
 void micropp<tdim>::calc_ctan_lin_fe_models()
 {
 
-#pragma omp parallel for schedule(dynamic,1)
+// #pragma omp parallel for schedule(dynamic,1)
 	for (int i = 0; i < nvoi; ++i) {
 
 		const int ns[3] = { nx, ny, nz };

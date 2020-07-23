@@ -62,7 +62,7 @@ void micropp<tdim>::homogenize_linear()
 {
 	INST_START;
 
-#pragma omp parallel for schedule(dynamic,1)
+// #pragma omp parallel for schedule(dynamic,1)
 	for (int igp = 0; igp < ngp; ++igp) {
 
 		gp_t<tdim> *gp_ptr = &gp_list[igp];
@@ -82,10 +82,29 @@ void micropp<tdim>::homogenize()
 {
 	INST_START;
 
-#pragma omp parallel for schedule(dynamic,1)
+// #pragma omp parallel for schedule(dynamic,1)
 	for (int igp = 0; igp < ngp; ++igp) {
 
 		gp_t<tdim> *gp_ptr = &gp_list[igp];
+
+		int *tpell_cols = ell_cols;
+		const int tell_cols_size = ell_cols_size;
+                // for pragmas
+		const int lnvoi = nvoi;
+
+		material_t *tpmaterial0 = material_list[0];
+		material_t *tpmaterial1 = material_list[1];
+		material_t *tpmaterial2 = material_list[2];
+		const int tnumMaterials = MAX_MATERIALS;
+
+		int *tpelem_type = elem_type;
+		const int tnelem = nelem;
+		const int tnndim = nndim;
+		const int tnvars = nvars;
+		double *tpu_k = gp_ptr->u_k;
+		double *tpu_n = gp_ptr->u_n;
+		double *tpvars_k = gp_ptr->vars_k;
+		double *tpvars_n = gp_ptr->vars_n;
 
 		if (gp_ptr->coupling == FE_LINEAR ||
 		    gp_ptr->coupling == MIX_RULE_CHAMIS) {
@@ -103,11 +122,60 @@ void micropp<tdim>::homogenize()
 
 		} else if (gp_ptr->coupling == FE_ONE_WAY) {
 
-			homogenize_fe_one_way(gp_ptr, ell_cols, ell_cols_size);
+                    #if 0
+                        {
+                            int s;
+                            void *l = rrl_malloc(4);
+                            void *d = rrd_malloc(4);
+                            void *m = malloc(4);
+                            std::cout << "on stack   " << (void*)&s << "\n";
+                            std::cout << "rrl_malloc " << (void*)l << "\n";
+                            std::cout << "rrd_malloc " << (void*)d << "\n";
+                            std::cout << "malloc     " << (void*)m << "\n";
+                            assert(location_of(&s, "stack") == NOT_MALLOC);
+                            assert(location_of(l, "rrl_malloc") == NOT_MALLOC);
+                            assert(location_of(d, "rrd_malloc") == NOT_MALLOC);
+                            assert(location_of(m, "malloc") == ON_MALLOC);
+                        }
+                    #endif
+                        assert(location_of(this, "this") != ON_MALLOC);
+                        assert(location_of(tpell_cols, "tpell_cols") != ON_MALLOC);
+                        assert(location_of(tpmaterial0, "tpmaterial0") != ON_MALLOC);
+                        assert(location_of(tpmaterial1, "tpmaterial0") != ON_MALLOC);
+                        assert(location_of(tpmaterial2, "tpmaterial2") != ON_MALLOC);
+                        assert(location_of(tpelem_type, "tpelem_type") != ON_MALLOC);
+                        assert(location_of(gp_ptr, "gp_ptr") != ON_MALLOC);
+                        assert(location_of(tpu_k, "tpu_k") != ON_MALLOC);
+                        assert(location_of(tpvars_n, "tpvars_n") != ON_MALLOC);
+
+                        #pragma oss task in(this[0])	  	  \
+                                in(tpell_cols[0; tell_cols_size]) \
+                                in(tpmaterial0[0])                \
+                                in(tpmaterial1[0])                \
+                                in(tpmaterial2[0])                \
+                                in(tpelem_type[0; tnelem])	  \
+                                inout(gp_ptr[0])		  \
+                                out(tpu_k[0; tnndim])		  \
+                                in(tpu_n[0; tnndim])		  \
+                                out(tpvars_k[0; tnvars])          \
+                                in(tpvars_n[0; tnvars])           
+			homogenize_fe_one_way(gp_ptr, tpell_cols, tell_cols_size);
+                        #pragma oss taskwait
 
 		} else if (gp_ptr->coupling == FE_FULL) {
-
-			homogenize_fe_full(gp_ptr, ell_cols, ell_cols_size);
+#if 0
+                        #pragma oss task in(this[0])		\
+                                in(tpell_cols[0; tell_cols_size]) \
+                                in(tpmaterial0[0]) \
+                                in(tpmaterial1[0]) \
+                                in(tpmaterial2[0]) \
+                                in(tpelem_type[0; tnelem])	\
+                                                                \
+                                inout(gp_ptr[0])		\
+                                out(tpu_k[0; tnndim])		\
+                                out(tpvars_n[0; tnvars])
+#endif
+			homogenize_fe_full(gp_ptr, tpell_cols, tell_cols_size);
 
 		}
 	}
@@ -133,6 +201,7 @@ void micropp<tdim>::homogenize_linear(gp_t<tdim> * gp_ptr, int *ell_cols, int el
 template<int tdim>
 void micropp<tdim>::homogenize_fe_one_way(gp_t<tdim> * gp_ptr, int *ell_cols, int ell_cols_size)
 {
+        std::cout << "homogenize_fe_one_way on " << get_node_id() << " of " << get_nodes_nr() << "; this=" << this << "\n";
 
 	ell_matrix A;  // Jacobian
 	const int ns[3] = { nx, ny, nz };
@@ -211,6 +280,7 @@ void micropp<tdim>::homogenize_fe_one_way(gp_t<tdim> * gp_ptr, int *ell_cols, in
 	free(u);
 	free(du);
 	free(vars_new_aux);
+
 }
 
 

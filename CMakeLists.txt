@@ -21,7 +21,7 @@ if (NANOS6)
 
     add_definitions("--ompss-2 -k -DNANOS6")
     set(CMAKE_C_FLAGS  "${CMAKE_C_FLAGS} --ompss-2 -k -DNANOS6")
-    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} --ompss-2 -k -DNANOS6")
+    set(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} --ompss-2 -g -k -DNANOS6")
     set(CMAKE_Fortran_FLAGS  "${CMAKE_Fortran_FLAGS} --ompss-2 -k -DNANOS6")
 
     set(CMAKE_SHARED_LINKER_FLAGS "${CMAKE_SHARED_LINKER_FLAGS} --ompss-2")

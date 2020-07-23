@@ -33,6 +33,20 @@
 
 #include "nanos6.h"
 
+
+#define NOT_MALLOC   100
+#define ON_MALLOC  103
+
+inline int location_of(const void *addr, const char *name)
+{
+    size_t a = (size_t)addr;
+    a >>= 16;
+    // std::cout << name << " " << (void *)a << "\n";
+    if (a >= 0x7f00000)
+        return ON_MALLOC;
+    return NOT_MALLOC;
+}
+
 static inline void *rrd_malloc(size_t size)
 {
 	void *ret = nanos6_dmalloc(size, nanos6_equpart_distribution, 0, nullptr);
