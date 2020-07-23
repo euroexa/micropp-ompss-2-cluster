@@ -92,13 +92,13 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		calc_bmat(gp, bmat[gp]);
 	}
 
-	gp_list = (gp_t<tdim> *) /*rrd_*/malloc(ngp * sizeof(gp_t<tdim>));
+	gp_list = (gp_t<tdim> *) rrl_malloc(ngp * sizeof(gp_t<tdim>)); // TODO rrd
 
-	dvars_n = (double *) /*rrd_*/malloc(ngp * nvars * sizeof(double));
-	dvars_k = (double *) /*rrd_*/malloc(ngp * nvars * sizeof(double));
+	dvars_n = (double *) rrl_malloc(ngp * nvars * sizeof(double)); // TODO rrd
+	dvars_k = (double *) rrl_malloc(ngp * nvars * sizeof(double)); // TODO rrd
 
-	du_n = (double *) /*rrd_*/malloc(ngp * nndim * sizeof(double));
-	du_k = (double *) /*rrd_*/malloc(ngp * nndim * sizeof(double));
+	du_n = (double *) rrl_malloc(ngp * nndim * sizeof(double)); // TODO rrd
+	du_k = (double *) rrl_malloc(ngp * nndim * sizeof(double)); // TODO rrd
 
 	for (int gp = 0; gp < ngp; gp++) {
 
@@ -236,6 +236,7 @@ micropp<tdim>::~micropp()
 
 	cout << "Calling micropp<" << dim << "> destructor" << endl;
 
+        rrl_free(ell_cols, ell_cols_size * sizeof(int)); // TODO rrd
 	rrl_free(elem_stress, nelem * nvoi * sizeof(double)); // TODO rrd
 	rrl_free(elem_strain, nelem * nvoi * sizeof(double)); // TODO rrd
 	rrl_free(elem_type, nelem * sizeof(int)); // TODO rrd
@@ -258,7 +259,14 @@ micropp<tdim>::~micropp()
 		rrl_free(material_list[i], sizeof(material_list[i])); // TODO rrd
 	}
 
-	// rrd_free(gp_list, ngp * sizeof(gp_t<tdim>)); // TODO
+	rrl_free(du_k, ngp * nndim * sizeof(double)); // TODO rrd
+	rrl_free(du_n, ngp * nndim * sizeof(double)); // TODO rrd
+
+	rrl_free(dvars_k, ngp * nvars * sizeof(double)); // TODO rrd
+	rrl_free(dvars_n, ngp * nvars * sizeof(double)); // TODO rrd
+
+
+	rrl_free(gp_list, ngp * sizeof(gp_t<tdim>)); // TODO rrd
 }
 
 
