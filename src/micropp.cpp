@@ -75,7 +75,34 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		calc_bmat(gp, bmat[gp]);
 	}
 
-	gp_list = new gp_t<tdim>[ngp]();
+	gp_list = (gp_t<tdim> *) /*rrd_*/malloc(ngp * sizeof(gp_t<tdim>));
+
+	dvars_n = (double *) /*rrd_*/malloc(ngp * nvars * sizeof(double));
+	dvars_k = (double *) /*rrd_*/malloc(ngp * nvars * sizeof(double));
+
+	du_n = (double *) /*rrd_*/malloc(ngp * nndim * sizeof(double));
+	du_k = (double *) /*rrd_*/malloc(ngp * nndim * sizeof(double));
+
+	for (int gp = 0; gp < ngp; gp++) {
+
+		gp_t<tdim> *tpgp = &gp_list[gp];
+
+		double *tpint_vars_n = &dvars_n[nvars * gp];
+		double *tpint_vars_k = &dvars_k[nvars * gp];
+
+		double *tpu_n = &du_n[nndim * gp];
+		double *tpu_k = &du_k[nndim * gp];
+
+		const int tnndim = nndim;
+
+		// #pragma oss task out(tpgp[0])		\
+		//	in(tpctan_lin[0;tnvoi2])	\
+		//	out(tpu_n[0;nndim])		\
+		//	label(init_gp)
+		tpgp->init(tpint_vars_n, tpint_vars_k, tpu_n, tpu_k, tnndim); //, tpctan_lin);
+	}
+	#pragma oss taskwait
+
 	for (int gp = 0; gp < ngp; ++gp) {
 		if(params.coupling != nullptr) {
 			gp_list[gp].coupling = params.coupling[gp];
@@ -214,7 +241,7 @@ micropp<tdim>::~micropp()
 		delete material_list[i];
 	}
 
-	delete [] gp_list;
+	// rrd_free(gp_list, ngp * sizeof(gp_t<tdim>)); // TODO
 }
 
 

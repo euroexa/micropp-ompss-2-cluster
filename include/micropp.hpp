@@ -108,6 +108,7 @@ class micropp {
 
                 int *ell_cols;
                 int ell_cols_size;
+		double *du_n, *du_k, *dvars_n, *dvars_k;
 
 		/* Rule of Mixture Stuff (for 2 mats micro-structure only) */
 		double Vm;  // Volume fraction of Matrix

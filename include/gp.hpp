@@ -28,6 +28,8 @@
 #include <cassert>
 #include <cstdlib>
 
+#include "tasks.hpp"
+
 using namespace std;
 
 template <int dim>
@@ -56,46 +58,44 @@ class gp_t {
 	bool subiterated;
 	int coupling;
 
-	gp_t():
-		u_n(nullptr),
-		u_k(nullptr),
-		vars_n(nullptr),
-		vars_k(nullptr),
-		allocated(false),
-		cost(0),
-		converged(true),
-		subiterated(false)
-	{}
+	gp_t() = delete;
+        
+            void init(double *_vars_n, double *_vars_k,
+                      double *_u_n, double *_u_k, int nndim)
+                      // double *ctan_lin)
+            {
+                    assert(nndim > 0);
+                    allocated = false;
+                    cost = 0;
+                    converged = true;
+                    subiterated = false;
 
-	~gp_t()
-	{
-		if (u_n != nullptr) {
-			free(u_n);
-		}
-		if (u_k != nullptr) {
-			free(u_k);
-		}
-		if (allocated) {
-			free(vars_n);
-			free(vars_k);
-		}
-	}
+                    vars_n = _vars_n;
+                    vars_k = _vars_k;
+
+                    u_n = _u_n;
+                    u_k = _u_k;
+
+                    // macro_ctan = ctan_lin;
+
+                    memset(_u_n, 0, nndim * sizeof(double));
+
+                    dbprintf("gp: %p \t u_n: %p u_k: %p vars_n: %p vars_k: %p "
+                             "allocated: %d node: %d/%d\n",
+                             this, u_k, u_k, vars_n, vars_k, allocated,
+                             get_node_id(), get_nodes_nr());
+            }
+
+	~gp_t() {}
 
 	void allocate_u()
 	{
-		u_n = (double *) calloc(nndim, sizeof(double));
-		u_k = (double *) calloc(nndim, sizeof(double));
 	}
 
 	void allocate()
 	{
 		assert(!allocated);
-
-		vars_n = (double *) calloc(nvars, sizeof(double));
-		vars_k = (double *) calloc(nvars, sizeof(double));
-
-		allocated = (vars_n && vars_k);
-		assert(allocated);
+		allocated = true;
 	}
 
 
