@@ -92,31 +92,31 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		calc_bmat(gp, bmat[gp]);
 	}
 
-	gp_list = (gp_t<tdim> *) rrl_malloc(ngp * sizeof(gp_t<tdim>)); // TODO rrd
+	gp_list = (gp_t<tdim> *) rrl_malloc(ngp * sizeof(gp_t<tdim>)); // TODO rrd: no! accessed in homogenize outer
 
-	dvars_n = (double *) rrl_malloc(ngp * nvars * sizeof(double)); // TODO rrd
-	dvars_k = (double *) rrl_malloc(ngp * nvars * sizeof(double)); // TODO rrd
+	dvars_n = (double *) rrd_malloc(ngp * nvars * sizeof(double));
+	dvars_k = (double *) rrd_malloc(ngp * nvars * sizeof(double));
 
-	du_n = (double *) rrl_malloc(ngp * nndim * sizeof(double)); // TODO rrd
-	du_k = (double *) rrl_malloc(ngp * nndim * sizeof(double)); // TODO rrd
+	du_n = (double *) rrd_malloc(ngp * nndim * sizeof(double));
+	du_k = (double *) rrd_malloc(ngp * nndim * sizeof(double));
 
 	for (int gp = 0; gp < ngp; gp++) {
 
 		gp_t<tdim> *tpgp = &gp_list[gp];
 
-		double *tpint_vars_n = &dvars_n[nvars * gp];
-		double *tpint_vars_k = &dvars_k[nvars * gp];
+		double *tpvars_n = &dvars_n[nvars * gp];
+		double *tpvars_k = &dvars_k[nvars * gp];
 
 		double *tpu_n = &du_n[nndim * gp];
 		double *tpu_k = &du_k[nndim * gp];
 
 		const int tnndim = nndim;
 
-		// #pragma oss task out(tpgp[0])		\
-		//	in(tpctan_lin[0;tnvoi2])	\
-		//	out(tpu_n[0;nndim])		\
-		//	label(init_gp)
-		tpgp->init(tpint_vars_n, tpint_vars_k, tpu_n, tpu_k, tnndim); //, tpctan_lin);
+		#pragma oss task out(tpgp[0])		\
+			out(tpu_n[0;nndim])		\
+                    	label(init_gp)                  \
+                        priority(0)
+		tpgp->init(tpvars_n, tpvars_k, tpu_n, tpu_k, tnndim); //, tpctan_lin);
 	}
 	#pragma oss taskwait
 
@@ -189,6 +189,8 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	if (calc_ctan_lin_flag) {
 		int num_fe_points = gp_counter[FE_LINEAR] + gp_counter[FE_ONE_WAY] + gp_counter[FE_FULL];
 		if (num_fe_points > 0) {
+                        assert(0);
+                        // needs to be a task as accesses ell_cols allocated with rrd_malloc
 			calc_ctan_lin_fe_models();
 		}
 	}
@@ -259,11 +261,11 @@ micropp<tdim>::~micropp()
 		rrl_free(material_list[i], sizeof(material_list[i])); // TODO rrd
 	}
 
-	rrl_free(du_k, ngp * nndim * sizeof(double)); // TODO rrd
-	rrl_free(du_n, ngp * nndim * sizeof(double)); // TODO rrd
+	rrd_free(du_k, ngp * nndim * sizeof(double)); // TODO rrd
+	rrd_free(du_n, ngp * nndim * sizeof(double)); // TODO rrd
 
-	rrl_free(dvars_k, ngp * nvars * sizeof(double)); // TODO rrd
-	rrl_free(dvars_n, ngp * nvars * sizeof(double)); // TODO rrd
+	rrd_free(dvars_k, ngp * nvars * sizeof(double)); // TODO rrd
+	rrd_free(dvars_n, ngp * nvars * sizeof(double)); // TODO rrd
 
 
 	rrl_free(gp_list, ngp * sizeof(gp_t<tdim>)); // TODO rrd

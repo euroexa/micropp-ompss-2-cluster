@@ -105,6 +105,7 @@ void micropp<tdim>::homogenize()
 		double *tpu_n = gp_ptr->u_n;
 		double *tpvars_k = gp_ptr->vars_k;
 		double *tpvars_n = gp_ptr->vars_n;
+                int priority = gp_ptr->allocated ? 10 : 1;
 
 		if (gp_ptr->coupling == FE_LINEAR ||
 		    gp_ptr->coupling == MIX_RULE_CHAMIS) {
@@ -158,7 +159,8 @@ void micropp<tdim>::homogenize()
                                 out(tpu_k[0; tnndim])		  \
                                 in(tpu_n[0; tnndim])		  \
                                 out(tpvars_k[0; tnvars])          \
-                                in(tpvars_n[0; tnvars])           
+                                in(tpvars_n[0; tnvars])           \
+                                priority(priority)
 			homogenize_fe_one_way(gp_ptr, tpell_cols, tell_cols_size);
 
 		} else if (gp_ptr->coupling == FE_FULL) {
