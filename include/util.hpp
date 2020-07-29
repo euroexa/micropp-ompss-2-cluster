@@ -41,6 +41,9 @@
 #include <cstring>
 #include <cassert>
 
+#include <stdarg.h>
+#include <unistd.h>
+#include <nanos6.h>
 
 using namespace std;
 
@@ -207,3 +210,15 @@ void printarray(const int size, T *array)
 	cerr << "]\n";
 }
 
+static inline void print_hostname(const char *s, ...)
+{
+    va_list args;
+    char hostname[1024];
+    char buffer[1024];
+    gethostname(hostname, 1024);
+
+    va_start(args, s);
+    vsprintf(buffer, s, args);
+    printf("on %s (%d): %s", hostname, nanos6_get_cluster_node_id(), buffer);
+    va_end(args);
+}
