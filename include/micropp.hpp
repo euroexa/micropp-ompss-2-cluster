@@ -116,7 +116,8 @@ class micropp {
 		/* IO files */
 		const bool write_log_flag;
 		int log_id = 0;
-		ofstream ofstream_log;
+
+		// ofstream ofstream_log; // Removed due to failures with ASan
 
 		/* GPU number for device selection */
 		int gpu_id = 0;

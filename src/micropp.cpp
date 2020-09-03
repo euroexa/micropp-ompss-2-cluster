@@ -228,8 +228,10 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 		std::string file_name_string = filename_stream.str();
 		strcpy(filename, file_name_string.c_str());
 
+#if 0
 		ofstream_log.open(filename, ios::out);
 		ofstream_log << "#<gp_id>  <non-linear>  <cost>  <converged>" << endl;
+#endif
 	}
 
 }

@@ -316,7 +316,7 @@ void micropp<tdim>::write_log()
 	 * <gp_id>  <non-linear>  <cost>   <converged>
 	 *
 	 */
-
+#if 0
 	ofstream_log << "log_id : " << log_id << endl;
 
 	for (int gp_id = 0; gp_id < ngp; ++gp_id) {
@@ -329,6 +329,7 @@ void micropp<tdim>::write_log()
 			<< endl;
 	}
 	log_id ++;
+#endif
 }
 
 
