@@ -106,7 +106,10 @@ int main(int argc, char **argv)
 
 	for (int t = 0; t < time_steps; ++t) {
 
-		cout << "Time step = " << t << endl;
+		if (rank == 0) {
+			cout << "Time step = " << t << endl;
+		}
+		MPI_Barrier(comm);
 
 		eps_nol[dir] += D_EPS * 10;
 		eps_lin[dir] += D_EPS * 0.1;
@@ -118,6 +121,7 @@ int main(int argc, char **argv)
 				micro.set_strain(gp, eps_lin);
 			}
 		}
+#ifdef PRINTS
 		cout << "eps_lin = ";
 		for (int i = 0; i < 6; ++i) {
 			cout << eps_lin[i] << " ";
@@ -128,15 +132,19 @@ int main(int argc, char **argv)
 			cout << eps_nol[i] << " ";
 		}
 		cout << endl;
+#endif
 
 		auto start = high_resolution_clock::now();
 
+#ifdef PRINTS
 		cout << "Homogenizing ..." << endl;
+#endif
 		micro.homogenize();
 
 		auto stop = high_resolution_clock::now();
 		auto duration = duration_cast<milliseconds>(stop - start);
 
+#ifdef PRINTS
 		for (int gp = 0; gp < ngp_per_mpi; ++gp) {
 			micro.get_stress(gp, sig);
 			int non_linear = micro.is_non_linear(gp);
@@ -152,6 +160,7 @@ int main(int argc, char **argv)
 			cout << endl;
 		}
 		cout << endl;
+#endif
 
 		micro.update_vars();
 

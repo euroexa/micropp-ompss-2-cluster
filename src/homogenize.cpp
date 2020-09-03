@@ -108,8 +108,6 @@ void micropp<tdim>::homogenize()
                 int nonlinear = gp_ptr->strain[1] > 0.001;
                 int priority = nonlinear ? 10 : 1;
 
-                printf("app rank %d: task priority %d\n", mpi_rank, priority);
-
 		if (gp_ptr->coupling == FE_LINEAR ||
 		    gp_ptr->coupling == MIX_RULE_CHAMIS) {
 
@@ -208,8 +206,6 @@ void micropp<tdim>::homogenize_linear(gp_t<tdim> * gp_ptr, int *ell_cols, int el
 template<int tdim>
 void micropp<tdim>::homogenize_fe_one_way(gp_t<tdim> * gp_ptr, int *ell_cols, int ell_cols_size)
 {
-        std::cout << "app rank = " << mpi_rank << " homogenize_fe_one_way on " << get_node_id() << " of " << get_nodes_nr() << "\n";
-
 	ell_matrix A;  // Jacobian
 	const int ns[3] = { nx, ny, nz };
 	ell_init(&A, ell_cols, dim, dim, ns, CG_ABS_TOL, CG_REL_TOL, CG_MAX_ITS);

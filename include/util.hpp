@@ -23,7 +23,7 @@
 #pragma once
 
 // Debug print macro.
-#ifdef NDEBUG
+#if 1 //def NDEBUG
 #define dbprintf(...)
 #else
 #define dbprintf(...) fprintf(stderr, __VA_ARGS__)
