@@ -134,8 +134,7 @@ void micropp<tdim>::homogenize()
                                 out(tpu_k[0; tnndim])		  \
                                 in(tpu_n[0; tnndim])		  \
                                 out(tpvars_k[0; tnvars])          \
-                                in(tpvars_n[0; tnvars])           \
-                                priority(priority)
+                                in(tpvars_n[0; tnvars])
 			homogenize_fe_one_way(gp_ptr, tpell_cols, tell_cols_size);
 
 		} else if (gp_ptr->coupling == FE_FULL) {
