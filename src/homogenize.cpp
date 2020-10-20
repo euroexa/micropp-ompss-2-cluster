@@ -124,32 +124,6 @@ void micropp<tdim>::homogenize()
 
 		} else if (gp_ptr->coupling == FE_ONE_WAY) {
 
-                    #if 0
-                        {
-                            int s;
-                            void *l = rrl_malloc(4);
-                            void *d = rrd_malloc(4);
-                            void *m = malloc(4);
-                            std::cout << "on stack   " << (void*)&s << "\n";
-                            std::cout << "rrl_malloc " << (void*)l << "\n";
-                            std::cout << "rrd_malloc " << (void*)d << "\n";
-                            std::cout << "malloc     " << (void*)m << "\n";
-                            assert(location_of(&s, "stack") == NOT_MALLOC);
-                            assert(location_of(l, "rrl_malloc") == NOT_MALLOC);
-                            assert(location_of(d, "rrd_malloc") == NOT_MALLOC);
-                            assert(location_of(m, "malloc") == ON_MALLOC);
-                        }
-                        assert(location_of(this, "this") != ON_MALLOC);
-                        assert(location_of(tpell_cols, "tpell_cols") != ON_MALLOC);
-                        assert(location_of(tpmaterial0, "tpmaterial0") != ON_MALLOC);
-                        assert(location_of(tpmaterial1, "tpmaterial0") != ON_MALLOC);
-                        assert(location_of(tpmaterial2, "tpmaterial2") != ON_MALLOC);
-                        assert(location_of(tpelem_type, "tpelem_type") != ON_MALLOC);
-                        assert(location_of(gp_ptr, "gp_ptr") != ON_MALLOC);
-                        assert(location_of(tpu_k, "tpu_k") != ON_MALLOC);
-                        assert(location_of(tpvars_n, "tpvars_n") != ON_MALLOC);
-                    #endif
-
                         #pragma oss task in(this[0])	  	  \
                                 in(tpell_cols[0; tell_cols_size]) \
                                 in(tpmaterial0[0])                \
@@ -165,19 +139,6 @@ void micropp<tdim>::homogenize()
 			homogenize_fe_one_way(gp_ptr, tpell_cols, tell_cols_size);
 
 		} else if (gp_ptr->coupling == FE_FULL) {
-                        assert(0);
-#if 0
-                        #pragma oss task in(this[0])		\
-                                in(tpell_cols[0; tell_cols_size]) \
-                                in(tpmaterial0[0]) \
-                                in(tpmaterial1[0]) \
-                                in(tpmaterial2[0]) \
-                                in(tpelem_type[0; tnelem])	\
-                                                                \
-                                inout(gp_ptr[0])		\
-                                out(tpu_k[0; tnndim])		\
-                                out(tpvars_n[0; tnvars])
-#endif
 			homogenize_fe_full(gp_ptr, tpell_cols, tell_cols_size);
 
 		}

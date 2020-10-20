@@ -100,6 +100,10 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 	du_n = (double *) rrd_malloc(ngp * nndim * sizeof(double));
 	du_k = (double *) rrd_malloc(ngp * nndim * sizeof(double));
 
+	const int ns[3] = { nx, ny, nz };
+	const int nfield = dim;
+	int *ell_cols = ell_init_cols(dim, dim, ns, &ell_cols_size);
+
 	for (int gp = 0; gp < ngp; gp++) {
 
 		gp_t<tdim> *tpgp = &gp_list[gp];
@@ -112,9 +116,6 @@ micropp<tdim>::micropp(const micropp_params_t &params):
 
 		const int tnndim = nndim;
 
-                const int ns[3] = { nx, ny, nz };
-                const int nfield = dim;
-                int *ell_cols = ell_init_cols(dim, dim, ns, &ell_cols_size);
 
 		#pragma oss task out(tpgp[0])		\
 			out(tpu_n[0;nndim])		\
