@@ -1,0 +1,14 @@
+#! /bin/bash
+#SBATCH --nodes=8
+#SBATCH --cpus-per-task=48
+#SBATCH --time=03:00:00
+
+ulimit -s 524288 # for AddressSanitizer
+module list
+make
+rm -rf micropp-8
+echo %j
+mkdir -p micropp-8
+cd micropp-8
+export
+${MERCURIUM}/../test_hybrid/all.py --continue-after-error --extrae --wait 3 --monitor 5 8 ../mpi-load-balance 10 4800 10

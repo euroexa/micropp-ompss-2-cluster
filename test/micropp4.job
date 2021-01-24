@@ -1,0 +1,22 @@
+#! /bin/bash
+#SBATCH --nodes=4
+#SBATCH --cpus-per-task=48
+#SBATCH --time=02:00:00
+#SBATCH --qos=debug
+
+#ulimit -s 524288 # for AddressSanitizer
+module list
+make
+rm -rf micropp-4
+mkdir -p micropp-4
+cd micropp-4
+
+# 4 vranks on 4 nodes
+${MERCURIUM}/../test_hybrid/all.py --vranks 4 --extrae --local --degree 1 --monitor 20 4 ../mpi-load-balance 10 2400 10
+${MERCURIUM}/../test_hybrid/all.py --vranks 4 --extrae --local --degree 2 --monitor 20 4 ../mpi-load-balance 10 2400 10
+${MERCURIUM}/../test_hybrid/all.py --vranks 4 --extrae --global --degree 2 --monitor 20 4 ../mpi-load-balance 10 2400 10
+
+# 8 vranks on 4 nodes
+${MERCURIUM}/../test_hybrid/all.py --vranks 8 --extrae --local --degree 1 --monitor 20 4 ../mpi-load-balance 10 2400 10
+${MERCURIUM}/../test_hybrid/all.py --vranks 8 --extrae --local --degree 2 --monitor 20 4 ../mpi-load-balance 10 2400 10
+${MERCURIUM}/../test_hybrid/all.py --vranks 8 --extrae --global --degree 2 --monitor 20 4 ../mpi-load-balance 10 2400 10
