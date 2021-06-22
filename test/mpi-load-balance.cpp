@@ -104,6 +104,8 @@ int main(int argc, char **argv)
 
 	cout << scientific;
 
+	int *all_times = (int *)malloc(nproc * sizeof(int));
+
 	for (int t = 0; t < time_steps; ++t) {
 
 		if (rank == 0) {
@@ -164,10 +166,21 @@ int main(int argc, char **argv)
 
 		micro.update_vars();
 
+		int time = duration.count();
+		printf("Before barrier %d; time=%d\n", rank, time);
 		MPI_Barrier(comm);
+		printf("After barrier %d\n", rank);
 
-		cout << "Rank = " << rank
-		     << " time = " << duration.count() << " ms" << endl;
+		memset(all_times, -1, nproc * sizeof(int));
+		MPI_Gather(&time, 1, MPI_INT, all_times, 1, MPI_INT, 0, comm);
+		if (rank == 0) {
+			for (int r = 0; r < nproc; r++) {
+				cout << "# " << argv[0] << " appranks=" << nproc << " deg=" << nanos6_get_num_cluster_iranks()
+					<< " rank=" << r << " step=" << t << " time=" << all_times[r] << " ms" << endl;
+			}
+		}
+		MPI_Barrier(comm);
+		printf("After second barrier %d\n", rank);
 	}
 
 	// MPI_Finalize();
