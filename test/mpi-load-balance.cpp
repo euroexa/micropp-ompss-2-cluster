@@ -167,9 +167,6 @@ int main(int argc, char **argv)
 		micro.update_vars();
 
 		int time = duration.count();
-		printf("Before barrier %d; time=%d\n", rank, time);
-		MPI_Barrier(comm);
-		printf("After barrier %d\n", rank);
 
 		memset(all_times, -1, nproc * sizeof(int));
 		MPI_Gather(&time, 1, MPI_INT, all_times, 1, MPI_INT, 0, comm);
@@ -180,7 +177,6 @@ int main(int argc, char **argv)
 			}
 		}
 		MPI_Barrier(comm);
-		printf("After second barrier %d\n", rank);
 	}
 
 	// MPI_Finalize();
